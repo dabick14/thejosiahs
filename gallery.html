@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery · Dag &amp; Gayle</title>
+  <meta name="description" content="Engagement photos of Dag Josiah &amp; Gayle Hughes.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500&display=swap" rel="stylesheet">
+
+  <!-- Vercel Web Analytics -->
+  <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+
+  <style>
+    :root {
+      --color-bg: #FFFFFF;
+      --color-bg-alt: #F5F6F7;
+      --color-text-primary: #14161A;
+      --color-text-body: #3A3D42;
+      --color-text-muted: #8A8F98;
+      --color-chrome: #9BA1AA;
+      --color-chrome-dark: #6B7078;
+      --gradient-chrome: linear-gradient(115deg, #EDEFF1 0%, #B9BEC6 38%, #F4F5F6 62%, #9BA1AA 100%);
+      --color-border: #E4E6E9;
+      --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'Satoshi', 'Jost', -apple-system, sans-serif;
+      --section-padding-y: clamp(4rem, 9vw, 7rem);
+      --section-padding-x: clamp(1.25rem, 6vw, 3rem);
+      --container-wide: 1100px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.75;
+      background: var(--color-bg);
+      color: var(--color-text-body);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100svh;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .site-nav {
+      position: sticky; top: 0; z-index: 20;
+      border-bottom: 1px solid var(--color-border);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .nav-inner {
+      max-width: var(--container-wide);
+      margin: 0 auto;
+      padding: 1.1rem var(--section-padding-x);
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+      font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .nav-brand { font-family: var(--font-display); font-size: 1.05rem; letter-spacing: 0.08em; color: var(--color-text-primary); }
+    .nav-link { color: var(--color-text-muted); border-bottom: 1px solid transparent; transition: border-color 0.2s, color 0.2s; }
+    .nav-link:hover { color: var(--color-text-primary); border-color: var(--color-chrome); }
+
+    .container { max-width: var(--container-wide); margin: 0 auto; padding: 0 var(--section-padding-x); }
+
+    .page-header { padding: var(--section-padding-y) 0 2.5rem; text-align: center; }
+    .eyebrow { font-size: 0.72rem; font-weight: 400; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 1rem; display: block; }
+    .page-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.1rem, 6.5vw, 3.4rem); line-height: 1.1; color: var(--color-text-primary); margin-bottom: 0.6rem; }
+    .page-subtitle { font-style: italic; font-family: var(--font-display); font-size: clamp(1rem, 2vw, 1.25rem); color: var(--color-text-muted); }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
+      padding-bottom: var(--section-padding-y);
+    }
+    .gallery-item {
+      display: block; width: 100%; border: none; padding: 0;
+      background: var(--color-bg-alt);
+      overflow: hidden; cursor: pointer; aspect-ratio: 4 / 5;
+    }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
+    .gallery-item:hover img { transform: scale(1.04); }
+
+    .lightbox {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(10, 11, 13, 0.95);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+    .lightbox-img { max-width: 88vw; max-height: 82vh; object-fit: contain; }
+
+    .lightbox-close, .lightbox-prev, .lightbox-next {
+      position: absolute; background: none; border: none;
+      color: rgba(255, 255, 255, 0.85); cursor: pointer;
+      font-size: 1.8rem; line-height: 1; padding: 0.5rem; transition: opacity 0.2s;
+    }
+    .lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover { opacity: 0.6; }
+    .lightbox-close { top: 1rem; right: 1rem; font-size: 2rem; }
+    .lightbox-prev { left: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 2.5rem; }
+    .lightbox-next { right: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 2.5rem; }
+    .lightbox-counter {
+      position: absolute; bottom: 1.25rem; left: 0; right: 0; text-align: center;
+      font-size: 0.72rem; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.6);
+    }
+
+    @media (max-width: 768px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <nav class="site-nav" aria-label="Page navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">D &amp; G</a>
+      <a href="index.html" class="nav-link">back to main page</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <header class="page-header">
+      <span class="eyebrow">dag &amp; gayle · august 8, 2026</span>
+      <h1 class="page-title">The Gallery</h1>
+      <p class="page-subtitle">Every moment, captured.</p>
+    </header>
+
+    <div class="gallery-grid" id="gallery-grid"></div>
+  </main>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
+    <button class="lightbox-prev" id="lightbox-prev" aria-label="Previous photo">&#8249;</button>
+    <img class="lightbox-img" id="lightbox-img" alt="">
+    <button class="lightbox-next" id="lightbox-next" aria-label="Next photo">&#8250;</button>
+    <div class="lightbox-counter" id="lightbox-counter"></div>
+  </div>
+
+  <script>
+    'use strict';
+    /* Static gallery sourced from the repo's own /pictures — no external CDN account
+       required. To grow the gallery post-launch, add entries here (or wire this up
+       to the shared guest-content backend — see /guest-content-backend-prompt.md). */
+    const photos = [
+      { sm: 'pictures/gallery-01-sm.webp', lg: 'pictures/gallery-01-lg.webp' },
+      { sm: 'pictures/gallery-02-sm.webp', lg: 'pictures/gallery-02-lg.webp' },
+      { sm: 'pictures/gallery-03-sm.webp', lg: 'pictures/gallery-03-lg.webp' },
+      { sm: 'pictures/gallery-04-sm.webp', lg: 'pictures/gallery-04-lg.webp' },
+      { sm: 'pictures/gallery-05-sm.webp', lg: 'pictures/gallery-05-lg.webp' },
+    ];
+
+    const grid = document.getElementById('gallery-grid');
+    photos.forEach((p, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'gallery-item';
+      btn.setAttribute('aria-label', `Open photo ${i + 1}`);
+      const img = document.createElement('img');
+      img.src = p.sm;
+      img.loading = 'lazy';
+      img.alt = 'Dag and Gayle';
+      btn.appendChild(img);
+      btn.addEventListener('click', () => openLightbox(i));
+      grid.appendChild(btn);
+    });
+
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCounter = document.getElementById('lightbox-counter');
+    let lightboxIndex = -1;
+
+    function openLightbox(i) {
+      lightboxIndex = i;
+      updateLightbox();
+      lightbox.classList.add('open');
+      lightbox.setAttribute('aria-hidden', 'false');
+    }
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      lightbox.setAttribute('aria-hidden', 'true');
+    }
+    function updateLightbox() {
+      const p = photos[lightboxIndex];
+      lightboxImg.src = p.lg;
+      lightboxImg.alt = `Photo ${lightboxIndex + 1} of ${photos.length}`;
+      lightboxCounter.textContent = `${lightboxIndex + 1} / ${photos.length}`;
+    }
+    function showPrev() { lightboxIndex = (lightboxIndex - 1 + photos.length) % photos.length; updateLightbox(); }
+    function showNext() { lightboxIndex = (lightboxIndex + 1) % photos.length; updateLightbox(); }
+
+    document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+    document.getElementById('lightbox-prev').addEventListener('click', showPrev);
+    document.getElementById('lightbox-next').addEventListener('click', showNext);
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', (e) => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') showPrev();
+      if (e.key === 'ArrowRight') showNext();
+    });
+  </script>
+</body>
+</html>
