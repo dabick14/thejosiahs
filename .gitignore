@@ -2,3 +2,4 @@ pictures/_originals/
 .venv/
 .DS_Store
 .claude/settings.local.json
+*.bak
