@@ -29,7 +29,7 @@
       /* Text */
       --color-text-primary: #14161A;
       --color-text-body:    #3A3D42;
-      --color-text-muted:   #8A8F98;
+      --color-text-muted:   #6B7078;
 
       /* Chrome accent family */
       --color-chrome-light: #DADDE1;
@@ -247,20 +247,38 @@
       position: absolute;
       inset: 0;
       z-index: -1;
+      background: var(--color-bg-alt);
     }
-    .hero-bg img {
+    .hero-bg-video {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      opacity: 0.16;
-      filter: grayscale(35%);
+      object-position: center;
+      display: block;
     }
     .hero-bg::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.72) 40%, #FFFFFF 92%);
+      background:
+        radial-gradient(ellipse 70% 62% at 50% 48%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.55) 55%, rgba(255,255,255,0.1) 100%),
+        linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.35) 22%, rgba(255,255,255,0.35) 75%, rgba(255,255,255,0.75) 100%);
     }
+    .hero-bg-fallback {
+      display: none;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    /* Respect reduced-motion: freeze on the static line-drawing instead of looping */
+    @media (prefers-reduced-motion: reduce) {
+      .hero-bg-video { display: none; }
+      .hero-bg-fallback { display: block; }
+    }
+    /* If the video fails to load/play, JS adds this to show the static fallback */
+    .hero-bg.video-failed .hero-bg-video { display: none; }
+    .hero-bg.video-failed .hero-bg-fallback { display: block; }
 
     /* Hero content is visible by default (no JS dependency for the most
        important content on the page) — the fade-up is a CSS-only progressive
@@ -802,12 +820,19 @@
        HERO
   ═══════════════════════════════════════════════════════ -->
   <section class="hero" aria-label="Welcome">
-    <div class="hero-bg" aria-hidden="true">
-      <img
-        src="pictures/hero-01-lg.webp"
-        srcset="pictures/hero-01-sm.webp 900w, pictures/hero-01-lg.webp 1600w"
-        sizes="100vw"
-        alt="">
+    <div class="hero-bg" id="hero-bg" aria-hidden="true">
+      <video
+        class="hero-bg-video"
+        id="hero-bg-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+        poster="fallback.png">
+        <source src="video.mp4" type="video/mp4">
+      </video>
+      <img class="hero-bg-fallback" src="fallback.png" alt="">
     </div>
     <span class="eyebrow hero-eyebrow" id="hero-eyebrow">you are invited to celebrate</span>
     <h1 class="hero-names" id="hero-names">Dag Josiah<span class="hero-amp">&amp;</span>Gayle Hughes</h1>
@@ -1166,10 +1191,18 @@
     <blockquote class="footer-quote reveal">"[Placeholder closing line or scripture]"</blockquote>
     <img class="footer-qr reveal" src="pictures/qr-code.svg" alt="QR code linking to this website" width="92" height="92">
     <p class="footer-names reveal">Dag &amp; Gayle · August 8, 2026</p>
-    <p class="footer-made reveal">Made with love ♡ by <a href="https://thecodefoundry.dev" target="_blank" rel="noopener noreferrer">thecodefoundry.dev</a></p>
+    <p class="footer-made reveal">made with <a href="https://cfweddings.live" target="_blank" rel="noopener noreferrer">cfweddings.live</a></p>
   </footer>
 
   <script>
+    /* ─── HERO BACKGROUND VIDEO: fallback to poster on error ── */
+    const heroBg = document.getElementById('hero-bg');
+    const heroBgVideo = document.getElementById('hero-bg-video');
+    if (heroBg && heroBgVideo) {
+      heroBgVideo.addEventListener('error', () => heroBg.classList.add('video-failed'), true);
+      heroBgVideo.querySelector('source').addEventListener('error', () => heroBg.classList.add('video-failed'));
+    }
+
     /* ─── SCROLL PROGRESS ─────────────────────────────── */
     const progressFill = document.getElementById('scroll-progress-fill');
     function updateProgress() {
