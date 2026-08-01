@@ -249,13 +249,33 @@
       z-index: -1;
       background: var(--color-bg-alt);
     }
-    .hero-bg-video {
+    /* The static line-drawing is always the base layer — the video sits on
+       top at opacity:0 and only crossfades in once JS confirms real playback
+       (the `playing` event), never on the passive `autoplay` attribute alone.
+       That way a blocked or slow-to-start autoplay (common on mobile — see
+       the JS below) just leaves the poster showing, instead of a paused,
+       broken-looking video with a native play button over it. */
+    .hero-bg-fallback {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
       object-position: center;
       display: block;
     }
+    .hero-bg-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      opacity: 0;
+      transition: opacity 0.9s ease;
+    }
+    .hero-bg.video-playing .hero-bg-video { opacity: 1; }
     .hero-bg::after {
       content: "";
       position: absolute;
@@ -264,21 +284,12 @@
         radial-gradient(ellipse 70% 62% at 50% 48%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.55) 55%, rgba(255,255,255,0.1) 100%),
         linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.35) 22%, rgba(255,255,255,0.35) 75%, rgba(255,255,255,0.75) 100%);
     }
-    .hero-bg-fallback {
-      display: none;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-    }
-    /* Respect reduced-motion: freeze on the static line-drawing instead of looping */
+    /* Respect reduced-motion: never attempt to play, stay on the static line-drawing */
     @media (prefers-reduced-motion: reduce) {
       .hero-bg-video { display: none; }
-      .hero-bg-fallback { display: block; }
     }
-    /* If the video fails to load/play, JS adds this to show the static fallback */
+    /* If the video fails to load/play, JS adds this to keep it hidden permanently */
     .hero-bg.video-failed .hero-bg-video { display: none; }
-    .hero-bg.video-failed .hero-bg-fallback { display: block; }
 
     /* Hero content is visible by default (no JS dependency for the most
        important content on the page) — the fade-up is a CSS-only progressive
@@ -861,6 +872,7 @@
   ═══════════════════════════════════════════════════════ -->
   <section class="hero" aria-label="Welcome">
     <div class="hero-bg" id="hero-bg" aria-hidden="true">
+      <img class="hero-bg-fallback" src="fallback.png" alt="">
       <video
         class="hero-bg-video"
         id="hero-bg-video"
@@ -872,7 +884,6 @@
         poster="fallback.png">
         <source src="video.mp4" type="video/mp4">
       </video>
-      <img class="hero-bg-fallback" src="fallback.png" alt="">
     </div>
     <span class="eyebrow hero-eyebrow" id="hero-eyebrow">you are invited to celebrate</span>
     <h1 class="hero-names" id="hero-names">Dag Josiah<span class="hero-amp">&amp;</span>Gayle Hughes</h1>
@@ -1234,32 +1245,37 @@
   </script>
 
   <script>
-    /* ─── HERO BACKGROUND VIDEO: fallback to poster on error, force-play
-       on iOS Safari ────────────────────────────────────────────────
-       The `autoplay` attribute alone is unreliable on iOS: slow cellular
-       can miss the autoplay window, backgrounded tabs pause it, and some
-       in-app browsers (WhatsApp/Instagram) need an explicit play() call
-       even when muted+playsinline — when it's blocked, WebKit shows a
-       native play button over the poster instead of erroring. Retry
-       play() at the moments it's most likely to have been silently
-       blocked, and as a last resort, resume on the guest's first tap. */
+    /* ─── HERO BACKGROUND VIDEO: poster-first crossfade ──────────────
+       The static line-drawing is always visible first. The video only
+       fades in once the browser fires `playing` — genuine confirmed
+       playback, never the passive `autoplay` attribute alone — because
+       autoplay is unreliable on mobile (slow cellular can miss the
+       window, backgrounded tabs pause it, some in-app browsers need an
+       explicit play() call even when muted+playsinline). This way a
+       blocked or slow-to-start autoplay just leaves the poster showing;
+       guests never see a paused, broken-looking video with a play
+       button over it. */
     const heroBg = document.getElementById('hero-bg');
     const heroBgVideo = document.getElementById('hero-bg-video');
     if (heroBg && heroBgVideo) {
       heroBgVideo.addEventListener('error', () => heroBg.classList.add('video-failed'), true);
       heroBgVideo.querySelector('source').addEventListener('error', () => heroBg.classList.add('video-failed'));
 
-      heroBgVideo.muted = true; // some WebKit webviews ignore the `muted` attribute unless it's also set as a JS property
-      const tryPlayHero = () => { heroBgVideo.play().catch(() => {}); };
-      tryPlayHero();
-      ['loadedmetadata', 'canplay', 'canplaythrough'].forEach(ev => heroBgVideo.addEventListener(ev, tryPlayHero));
-      document.addEventListener('visibilitychange', () => { if (!document.hidden) tryPlayHero(); });
-      window.addEventListener('pageshow', tryPlayHero);
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        heroBgVideo.addEventListener('playing', () => heroBg.classList.add('video-playing'));
 
-      const resumeHeroOnGesture = () => { if (heroBgVideo.paused) tryPlayHero(); };
-      window.addEventListener('touchstart', resumeHeroOnGesture, { passive: true, once: true });
-      window.addEventListener('scroll', resumeHeroOnGesture, { passive: true, once: true });
-      window.addEventListener('click', resumeHeroOnGesture, { once: true });
+        heroBgVideo.muted = true; // some WebKit webviews ignore the `muted` attribute unless it's also set as a JS property
+        const tryPlayHero = () => { heroBgVideo.play().catch(() => {}); };
+        tryPlayHero();
+        ['loadedmetadata', 'canplay', 'canplaythrough'].forEach(ev => heroBgVideo.addEventListener(ev, tryPlayHero));
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) tryPlayHero(); });
+        window.addEventListener('pageshow', tryPlayHero);
+
+        const resumeHeroOnGesture = () => { if (heroBgVideo.paused) tryPlayHero(); };
+        window.addEventListener('touchstart', resumeHeroOnGesture, { passive: true, once: true });
+        window.addEventListener('scroll', resumeHeroOnGesture, { passive: true, once: true });
+        window.addEventListener('click', resumeHeroOnGesture, { once: true });
+      }
     }
 
     /* ─── SCROLL PROGRESS ─────────────────────────────── */
