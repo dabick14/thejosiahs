@@ -393,6 +393,41 @@
     .stagger-parent.visible .stagger-child:nth-child(5) { transition-delay: 0.30s; }
     .stagger-parent.visible .stagger-child:nth-child(6) { transition-delay: 0.37s; }
 
+    /* ─── Animated hairline divider (opt-in) ─────────────────
+       Reusable between-section rule. Drop `<div class="hairline-divider" aria-hidden="true"></div>`
+       anywhere in the negative space between blocks; it draws left-to-right when scrolled
+       into view via the shared revealObserver below. Uses the site's existing chrome
+       gradient — no new color introduced. */
+    .hairline-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--gradient-chrome);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.9s ease;
+    }
+    .hairline-divider.visible { transform: scaleX(1); }
+    @media (prefers-reduced-motion: reduce) {
+      .hairline-divider { transform: scaleX(1); }
+    }
+
+    /* ─── Fade-up reveal (opt-in) ─────────────────────────────
+       Gentler alternative to .reveal (no blur, shorter duration) — add class="fade-up"
+       to any element you want to fade + rise into place on scroll. Driven by the same
+       shared revealObserver as .reveal; does not affect elements using .reveal. */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .fade-up { opacity: 1; transform: none; }
+    }
+
     /* ─── Buttons ─────────────────────────────────────────── */
     .btn {
       display: inline-flex;
@@ -555,9 +590,17 @@
     .teaser-link { font-size: 0.78rem; letter-spacing: 0.05em; border-bottom: 1px solid var(--color-chrome); padding-bottom: 2px; }
     @media (max-width: 640px) { .teaser-grid { grid-template-columns: 1fr; } }
 
-    /* ─── Guest Wishes Wall (hero feature) ───────────────── */
+    /* ─── Guest Wishes & Photos (hero feature, merged card) ── */
     .wishes-section { background: var(--color-bg-alt); }
-    .wish-flow {
+    .memory-sub {
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      color: var(--color-text-muted);
+      max-width: 46ch;
+      margin-top: 0.6rem;
+    }
+
+    .memory-card {
       max-width: 560px;
       margin: 0 auto clamp(3rem, 7vw, 4.5rem);
       background: var(--color-surface);
@@ -565,7 +608,7 @@
       padding: clamp(1.8rem, 5vw, 2.8rem);
       position: relative;
     }
-    .wish-flow::before {
+    .memory-card::before {
       content: "";
       position: absolute;
       top: 0; left: 0;
@@ -573,31 +616,20 @@
       height: 2px;
       background: var(--gradient-chrome);
     }
-    .wish-progress {
-      display: flex;
-      gap: 0.4rem;
-      margin-bottom: 1.6rem;
+    .memory-field { margin-bottom: 1.6rem; }
+    .memory-field:last-of-type { margin-bottom: 0; }
+    .memory-label {
+      display: block;
+      font-size: var(--text-label);
+      font-weight: 400;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-bottom: 0.6rem;
     }
-    .wish-progress-dot {
-      height: 2px;
-      flex: 1;
-      background: var(--color-border);
-      transition: background-color 0.3s ease;
-    }
-    .wish-progress-dot.active { background: var(--color-text-primary); }
+    .memory-hint { color: var(--color-chrome-dark); font-weight: 300; text-transform: none; letter-spacing: 0.02em; }
 
-    .wish-step { display: none; }
-    .wish-step.active { display: block; animation: wish-step-in 0.4s ease; }
-    @keyframes wish-step-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-    .wish-prompt {
-      font-family: var(--font-display);
-      font-size: clamp(1.2rem, 2.8vw, 1.55rem);
-      font-style: italic;
-      color: var(--color-text-primary);
-      margin-bottom: 1.4rem;
-    }
-    .wish-input, .wish-textarea {
+    .memory-input, .memory-textarea {
       width: 100%;
       font-family: var(--font-body);
       font-size: 1rem;
@@ -607,79 +639,77 @@
       background: transparent;
       padding: 0.6rem 0.1rem;
       transition: border-color 0.2s;
+      resize: none;
     }
-    .wish-input:focus, .wish-textarea:focus { outline: none; border-color: var(--color-text-primary); }
-    .wish-textarea { resize: vertical; min-height: 96px; line-height: 1.6; border: 1px solid var(--color-border); padding: 0.8rem; }
-    .wish-textarea:focus { border-color: var(--color-text-primary); }
+    .memory-input::placeholder, .memory-textarea::placeholder { color: var(--color-chrome-light); }
+    .memory-input:focus, .memory-textarea:focus { outline: none; border-color: var(--color-text-primary); }
+    .memory-textarea { min-height: 88px; line-height: 1.6; }
+    .memory-counter { text-align: right; font-size: 0.72rem; color: var(--color-text-muted); margin-top: 0.4rem; }
 
-    .wish-chips { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.4rem; }
-    .wish-chip {
-      font-size: 0.82rem;
-      padding: 0.55rem 1rem;
-      border: 1px solid var(--color-border);
-      background: transparent;
-      cursor: pointer;
-      color: var(--color-text-body);
-      transition: all 0.2s ease;
-    }
-    .wish-chip.selected { border-color: var(--color-text-primary); background: var(--color-text-primary); color: #fff; }
-
-    .wish-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.8rem; }
-    .wish-back { font-size: 0.8rem; color: var(--color-text-muted); background: none; border: none; cursor: pointer; }
-    .wish-back:hover { color: var(--color-text-primary); }
-    .wish-back:disabled { visibility: hidden; }
-
-    .wish-note {
-      text-align: center;
-      font-size: 0.78rem;
-      color: var(--color-text-muted);
-      margin-bottom: clamp(2rem, 5vw, 2.6rem);
-    }
-
-    .wish-wall {
-      column-count: 2;
-      column-gap: 1px;
-      background: var(--color-border);
-      border: 1px solid var(--color-border);
-    }
-    .wish-card {
-      background: var(--color-surface);
-      padding: 1.5rem;
-      break-inside: avoid;
-      margin-bottom: 1px;
-    }
-    .wish-card-text { font-size: 0.94rem; color: var(--color-text-body); margin-bottom: 0.8rem; }
-    .wish-card-meta { font-size: 0.72rem; letter-spacing: 0.04em; color: var(--color-chrome-dark); text-transform: uppercase; }
-    @media (max-width: 640px) { .wish-wall { column-count: 1; } }
-
-    /* ─── Guest Photo Sharing ────────────────────────────── */
-    .share-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 3px;
-      margin-bottom: clamp(2rem, 5vw, 2.8rem);
-    }
-    .share-grid figure { aspect-ratio: 1; overflow: hidden; background: var(--color-bg-alt); }
-    .share-grid img { width: 100%; height: 100%; object-fit: cover; }
-    .share-grid .share-add {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 0.4rem;
-      background: var(--color-bg-alt);
-      color: var(--color-text-muted);
-      font-size: 0.68rem;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      cursor: pointer;
+    .memory-dropzone {
       border: 1px dashed var(--color-chrome-light);
-      transition: border-color 0.2s, color 0.2s;
+      padding: 1.4rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
     }
-    .share-grid .share-add:hover { border-color: var(--color-chrome); color: var(--color-text-primary); }
-    .share-add-icon { font-size: 1.4rem; font-weight: 300; color: var(--color-chrome); }
-    .share-cta { text-align: center; }
-    .share-cta p { font-size: 0.85rem; color: var(--color-text-muted); margin-top: 0.9rem; }
+    .memory-dropzone:hover, .memory-dropzone.drag { border-color: var(--color-chrome); background: var(--color-bg-alt); }
+    .memory-dropzone-plus { font-family: var(--font-display); font-size: 1.7rem; color: var(--color-chrome); line-height: 1; margin-bottom: 0.4rem; }
+    .memory-dropzone-main { font-size: 0.88rem; color: var(--color-text-primary); }
+    .memory-dropzone-sub { font-size: 0.72rem; color: var(--color-text-muted); margin-top: 0.2rem; }
+
+    .memory-thumbs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.9rem; }
+    .memory-thumb { position: relative; width: 64px; height: 64px; overflow: hidden; background: var(--color-bg-alt); }
+    .memory-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .memory-thumb button {
+      position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; border: none;
+      border-radius: 50%; background: rgba(20,22,26,.72); color: #fff; font-size: 11px;
+      line-height: 18px; cursor: pointer; padding: 0;
+    }
+
+    .memory-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 1.8rem; gap: 1rem; }
+    .memory-note { font-size: 0.72rem; color: var(--color-text-muted); max-width: 22ch; }
+    #memory-send:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .memory-status { margin-top: 1rem; font-size: 0.82rem; min-height: 1.2rem; }
+    .memory-status.err { color: #A24C4C; }
+    .memory-status.ok { color: var(--color-text-muted); }
+
+    /* ─── Wish/photo preview strips (swipeable, capped) ──── */
+    .memory-preview { margin-bottom: clamp(2.5rem, 6vw, 3.5rem); }
+    .memory-preview:last-of-type { margin-bottom: 0; }
+    .memory-preview-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.8rem; margin-bottom: 1.1rem; }
+    .memory-preview-title { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; color: var(--color-text-primary); }
+    .memory-preview-count { font-size: 0.72rem; color: var(--color-text-muted); white-space: nowrap; }
+
+    .memory-strip {
+      display: flex; gap: 0.9rem; overflow-x: auto; padding-bottom: 0.5rem;
+      scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .memory-strip::-webkit-scrollbar { display: none; }
+
+    .memory-strip .wish-tile {
+      scroll-snap-align: start; flex: 0 0 78%; max-width: 300px;
+      background: var(--color-surface); border: 1px solid var(--color-border); padding: 1.4rem 1.3rem;
+    }
+    @media (min-width: 640px) { .memory-strip .wish-tile { flex-basis: 46%; } }
+    .wish-tile-text { font-family: var(--font-display); font-size: 1.05rem; line-height: 1.4; font-style: italic; color: var(--color-text-primary); margin-bottom: 0.9rem; }
+    .wish-tile-meta { font-size: 0.7rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-chrome-dark); }
+
+    .memory-strip .photo-tile {
+      scroll-snap-align: start; flex: 0 0 64%; max-width: 260px; aspect-ratio: 4/5;
+      overflow: hidden; background: var(--color-bg-alt);
+    }
+    @media (min-width: 640px) { .memory-strip .photo-tile { flex-basis: 31%; } }
+    .photo-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .memory-preview-empty { font-size: 0.85rem; color: var(--color-text-muted); }
+
+    .memory-seeall {
+      display: inline-block; margin-top: 0.9rem; font-size: 0.72rem; letter-spacing: 0.05em;
+      text-transform: uppercase; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); padding-bottom: 2px;
+    }
+    .memory-seeall:hover { color: var(--color-text-primary); border-color: var(--color-text-primary); }
 
     /* ─── Tidbits (single-column rows, not a card grid) ──── */
     .tidbit-list { display: flex; flex-direction: column; }
@@ -821,7 +851,6 @@
     <a href="#schedule" class="nav-ol">schedule</a>
     <a href="programme.html" class="nav-ol">programme</a>
     <a href="gallery.html" class="nav-ol">gallery</a>
-    <a href="#share-photos" class="nav-ol">share photos</a>
     <a href="#faq" class="nav-ol">faq</a>
     <a href="#gifts" class="nav-ol">gifts</a>
     <a href="https://steel-apology-048.notion.site/1a4f7b7538a88041af58f9381d2ff44d?pvs=105" class="nav-ol" target="_blank" rel="noopener noreferrer">rsvp</a>
@@ -856,59 +885,76 @@
   </section>
 
   <!-- ═══════════════════════════════════════════════════════
-       GUEST WISHES WALL — hero feature
+       GUEST WISHES &amp; PHOTOS — hero feature
   ═══════════════════════════════════════════════════════ -->
-  <section id="wishes" class="wishes-section" aria-label="Guest wishes">
+  <section id="wishes" class="wishes-section" aria-label="Guest wishes and photos">
     <div class="container">
       <div class="section-header reveal">
         <span class="eyebrow">before the day arrives</span>
-        <h2 class="section-title">Leave Dag &amp; Gayle a wish</h2>
+        <h2 class="section-title">Leave Dag &amp; Gayle a memory</h2>
+        <p class="memory-sub">Write them a wish, share a photo, or both — everything you leave becomes one keepsake for them after the wedding.</p>
       </div>
 
-      <form class="wish-flow reveal" id="wish-flow" novalidate>
-        <div class="wish-progress" aria-hidden="true">
-          <div class="wish-progress-dot active" data-dot="1"></div>
-          <div class="wish-progress-dot" data-dot="2"></div>
-          <div class="wish-progress-dot" data-dot="3"></div>
+      <div class="memory-card reveal">
+        <div class="memory-field">
+          <label class="memory-label" for="memory-name">Your name</label>
+          <input class="memory-input" type="text" id="memory-name" placeholder="So they know who to thank" maxlength="80" autocomplete="name">
         </div>
 
-        <div class="wish-step active" data-step="1">
-          <p class="wish-prompt">First, who do we have the pleasure of hearing from?</p>
-          <input class="wish-input" id="wish-name" type="text" placeholder="Your name" autocomplete="name" required>
-          <div class="wish-actions">
-            <button type="button" class="wish-back" disabled>back</button>
-            <button type="button" class="btn btn-primary" data-next>continue</button>
-          </div>
+        <div class="memory-field">
+          <label class="memory-label" for="memory-relation">How you know them <span class="memory-hint">optional</span></label>
+          <input class="memory-input" type="text" id="memory-relation" placeholder="e.g. Gayle's cousin, uni friend" maxlength="40">
         </div>
 
-        <div class="wish-step" data-step="2">
-          <p class="wish-prompt">And how do you know the two of them?</p>
-          <div class="wish-chips" id="wish-chips">
-            <button type="button" class="wish-chip" data-chip>Friend</button>
-            <button type="button" class="wish-chip" data-chip>Family</button>
-            <button type="button" class="wish-chip" data-chip>Church family</button>
-            <button type="button" class="wish-chip" data-chip>Colleague</button>
-            <button type="button" class="wish-chip" data-chip>Other</button>
-          </div>
-          <div class="wish-actions">
-            <button type="button" class="wish-back" data-back>back</button>
-            <button type="button" class="btn btn-primary" data-next>continue</button>
-          </div>
+        <div class="memory-field">
+          <label class="memory-label" for="memory-text">Your wish <span class="memory-hint">optional if you're adding a photo</span></label>
+          <textarea class="memory-textarea" id="memory-text" placeholder="A memory, a blessing, or just a few words…" maxlength="500"></textarea>
+          <div class="memory-counter"><span id="memory-count">0</span> / 500</div>
         </div>
 
-        <div class="wish-step" data-step="3">
-          <p class="wish-prompt" id="wish-prompt-3">Leave a blessing, a memory, or just some love.</p>
-          <textarea class="wish-textarea" id="wish-text" placeholder="Write your wish here…" required></textarea>
-          <div class="wish-actions">
-            <button type="button" class="wish-back" data-back>back</button>
-            <button type="submit" class="btn btn-primary">add to the wall</button>
+        <div class="memory-field">
+          <label class="memory-label">A photo or two <span class="memory-hint">optional</span></label>
+          <div class="memory-dropzone" id="memory-drop" role="button" tabindex="0" aria-label="Add photos">
+            <div class="memory-dropzone-plus">+</div>
+            <div class="memory-dropzone-main">Tap to add a photo</div>
+            <div class="memory-dropzone-sub">or drag one here · up to 4</div>
           </div>
+          <input type="file" id="memory-file" class="visually-hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
+          <div class="memory-thumbs" id="memory-thumbs"></div>
         </div>
-      </form>
 
-      <p class="wish-note">Wishes are saved here as they come in and gathered into one keepsake wall for Dag &amp; Gayle after the wedding.</p>
+        <!-- honeypot: bots fill this in, real guests never see it -->
+        <div class="visually-hidden" aria-hidden="true">
+          <label for="memory-company">Company</label>
+          <input type="text" id="memory-company" tabindex="-1" autocomplete="off">
+        </div>
 
-      <div class="wish-wall stagger-parent" id="wish-wall"></div>
+        <div class="memory-actions">
+          <span class="memory-note">Your wish and photos post together — one and done.</span>
+          <button type="button" class="btn btn-primary" id="memory-send">send</button>
+        </div>
+        <div class="memory-status" id="memory-status" aria-live="polite"></div>
+      </div>
+
+      <div class="memory-preview" aria-label="Wishes so far">
+        <div class="memory-preview-head">
+          <h3 class="memory-preview-title">Wishes so far</h3>
+          <span class="memory-preview-count" id="wish-preview-count"></span>
+        </div>
+        <div class="memory-strip" id="wish-strip"></div>
+        <!-- pending: point at the full keepsake wall/gallery page once it's built -->
+        <a class="memory-seeall" href="#">See the full wall →</a>
+      </div>
+
+      <div class="memory-preview" aria-label="Guest photos">
+        <div class="memory-preview-head">
+          <h3 class="memory-preview-title">Seen through your eyes</h3>
+          <span class="memory-preview-count" id="photo-preview-count"></span>
+        </div>
+        <div class="memory-strip" id="photo-strip"></div>
+        <!-- pending: point at the full keepsake wall/gallery page once it's built -->
+        <a class="memory-seeall" href="#">Open the gallery →</a>
+      </div>
     </div>
   </section>
 
@@ -958,7 +1004,7 @@
       </figure>
 
       <blockquote class="pull-quote reveal">
-        "From classmates at Dennis School Complex to forever — some stories just take the scenic route."
+        "From classmates at the Nest School Complex to forever — some stories just take the scenic route."
       </blockquote>
     </div>
   </section>
@@ -990,6 +1036,10 @@
           <span class="countdown-number" id="cd-seconds">00</span>
           <span class="countdown-label">seconds</span>
         </div>
+      </div>
+
+      <div class="fade-up" style="margin: clamp(2.5rem, 6vw, 4rem) 0;">
+        <div class="hairline-divider" aria-hidden="true"></div>
       </div>
 
       <div class="event-card reveal">
@@ -1029,36 +1079,6 @@
           <p class="teaser-copy">The Photo Gallery</p>
           <span class="teaser-link">view the gallery →</span>
         </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════════════════════════════
-       GUEST PHOTO SHARING
-  ═══════════════════════════════════════════════════════ -->
-  <section id="share-photos" aria-label="Share your photos">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="eyebrow">seen through your eyes</span>
-        <h2 class="section-title">Share Your Photos</h2>
-      </div>
-
-      <div class="share-grid stagger-parent" id="share-grid">
-        <figure class="stagger-child">
-          <img src="pictures/guestwall-01-sm.webp" loading="lazy" alt="A guest photo from Dag and Gayle's celebrations">
-        </figure>
-        <figure class="stagger-child">
-          <img src="pictures/guestwall-02-sm.webp" loading="lazy" alt="A guest photo from Dag and Gayle's celebrations">
-        </figure>
-        <button type="button" class="share-add stagger-child" id="share-add-btn">
-          <span class="share-add-icon">+</span>
-          <span>add yours</span>
-        </button>
-      </div>
-      <input type="file" id="share-file-input" accept="image/*" multiple class="visually-hidden">
-
-      <div class="share-cta reveal">
-        <p>Snap it, share it — your photos become part of this wall.</p>
       </div>
     </div>
   </section>
@@ -1127,7 +1147,7 @@
             <span>Can I take photos during the ceremony?</span>
             <span class="faq-icon" aria-hidden="true">+</span>
           </button>
-          <div class="faq-answer"><p class="faq-answer-inner">Yes — just be mindful of our official photographers. Add your favourites to the Share Your Photos wall above.</p></div>
+          <div class="faq-answer"><p class="faq-answer-inner">Yes — just be mindful of our official photographers. Add your favourites to the memory wall above.</p></div>
         </li>
         <li class="faq-item">
           <button class="faq-question" aria-expanded="false">
@@ -1208,6 +1228,12 @@
     <p class="footer-names reveal">Dag &amp; Gayle · August 8, 2026</p>
     <p class="footer-made reveal">made with <a href="https://cfweddings.live" target="_blank" rel="noopener noreferrer">cfweddings.live</a></p>
   </footer>
+
+  <!-- CF Weddings shared guest-content backend (Guest Wishes Wall + Guest Photo Sharing) -->
+  <script src="cfw-guest-content.js"></script>
+  <script>
+    CFWGuestContent.configure({ baseUrl: 'https://us-central1-cfweddingslive.cloudfunctions.net' });
+  </script>
 
   <script>
     /* ─── HERO BACKGROUND VIDEO: fallback to poster on error ── */
@@ -1340,140 +1366,157 @@
         }
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-    document.querySelectorAll('.reveal, .stagger-parent').forEach(el => revealObserver.observe(el));
+    document.querySelectorAll('.reveal, .stagger-parent, .hairline-divider, .fade-up').forEach(el => revealObserver.observe(el));
 
 
-    /* ─── GUEST WISHES WALL — guided multi-step flow ─────
-       NOTE: this is a frontend-only stub. Wishes persist to this
-       browser's localStorage only, seeded with sample entries so
-       the wall isn't empty pre-launch. submitWish() is the single
-       seam to swap in the shared CF Weddings guest-content backend
-       (see /guest-content-backend-prompt.md) once it exists — swap
-       the localStorage read/write below for a fetch() call.       */
+    /* ─── GUEST WISHES & PHOTOS — merged submission + preview ──
+       Backed by the shared CF Weddings guest-content service
+       (CFWGuestContent, configured above). */
     (function () {
-      const STORAGE_KEY = 'dagandgayle-wishes';
-      const seedWishes = [
-        { name: 'Auntie Efua', relation: 'Family', text: 'So happy for you both — may your home overflow with laughter and love. Can’t wait to celebrate!' },
-        { name: 'Kwabena', relation: 'Friend', text: 'From day one you two just made sense. Wishing you a marriage as steady as your friendship.' },
-      ];
+      const WEDDING_SLUG = 'dagandgayle';
+      const MAX_PHOTOS = 4;
+      const files = [];
 
-      function loadWishes() {
-        try {
-          const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-          return Array.isArray(stored) ? stored : seedWishes;
-        } catch {
-          return seedWishes;
+      const nameInput = document.getElementById('memory-name');
+      const relationInput = document.getElementById('memory-relation');
+      const textInput = document.getElementById('memory-text');
+      const countEl = document.getElementById('memory-count');
+      const companyInput = document.getElementById('memory-company');
+      const drop = document.getElementById('memory-drop');
+      const fileInput = document.getElementById('memory-file');
+      const thumbsBox = document.getElementById('memory-thumbs');
+      const sendBtn = document.getElementById('memory-send');
+      const statusEl = document.getElementById('memory-status');
+
+      textInput.addEventListener('input', () => { countEl.textContent = textInput.value.length; });
+
+      drop.addEventListener('click', () => fileInput.click());
+      drop.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+      });
+      ['dragover', 'dragenter'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('drag'); }));
+      ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('drag'); }));
+      drop.addEventListener('drop', (e) => addFiles(e.dataTransfer.files));
+      fileInput.addEventListener('change', (e) => addFiles(e.target.files));
+
+      function addFiles(list) {
+        for (const f of list) {
+          if (files.length >= MAX_PHOTOS) break;
+          if (!f.type.startsWith('image/')) continue;
+          files.push(f);
         }
+        renderThumbs();
+      }
+      function renderThumbs() {
+        thumbsBox.innerHTML = '';
+        files.forEach((f, i) => {
+          const url = URL.createObjectURL(f);
+          const d = document.createElement('div');
+          d.className = 'memory-thumb';
+          const img = document.createElement('img');
+          img.src = url; img.alt = '';
+          const btn = document.createElement('button');
+          btn.type = 'button'; btn.setAttribute('aria-label', 'Remove'); btn.textContent = '×';
+          btn.addEventListener('click', () => { files.splice(i, 1); renderThumbs(); });
+          d.appendChild(img); d.appendChild(btn);
+          thumbsBox.appendChild(d);
+        });
       }
 
-      function submitWish(wish) {
-        // TODO(backend): replace localStorage persistence with a POST to the
-        // shared guest-content service once it exists.
-        const wishes = loadWishes();
-        wishes.unshift(wish);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(wishes));
-        return wishes;
-      }
+      sendBtn.addEventListener('click', async () => {
+        const name = nameInput.value.trim();
+        const relation = relationInput.value.trim();
+        const text = textInput.value.trim();
+        const company = companyInput.value;
 
-      function renderWall() {
-        const wall = document.getElementById('wish-wall');
-        const wishes = loadWishes();
-        wall.innerHTML = '';
+        statusEl.className = 'memory-status';
+        if (!name) { statusEl.className = 'memory-status err'; statusEl.textContent = 'Add your name so they know who this is from.'; return; }
+        if (!text && files.length === 0) { statusEl.className = 'memory-status err'; statusEl.textContent = 'Leave a wish or add a photo (or both).'; return; }
+
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'sending…';
+        try {
+          if (text) {
+            await CFWGuestContent.submitWish({ weddingSlug: WEDDING_SLUG, name, relation, text, company });
+          }
+          for (const file of files) {
+            await CFWGuestContent.uploadPhoto({ weddingSlug: WEDDING_SLUG, file, company });
+          }
+
+          statusEl.className = 'memory-status ok';
+          statusEl.textContent = 'Sent — thank you. Dag & Gayle will treasure this.';
+          nameInput.value = ''; relationInput.value = ''; textInput.value = '';
+          countEl.textContent = '0'; files.length = 0; renderThumbs();
+          loadPreviews();
+        } catch (err) {
+          statusEl.className = 'memory-status err';
+          statusEl.textContent = (err && err.message) || 'Something went wrong — please try again.';
+        } finally {
+          sendBtn.disabled = false;
+          sendBtn.textContent = 'send';
+        }
+      });
+
+      /* ─── Capped previews (wishes + photos), hydrated on load ── */
+      const wishStrip = document.getElementById('wish-strip');
+      const wishCount = document.getElementById('wish-preview-count');
+      const photoStrip = document.getElementById('photo-strip');
+      const photoCount = document.getElementById('photo-preview-count');
+
+      function renderWishStrip(wishes) {
+        wishStrip.innerHTML = '';
+        if (!wishes.length) {
+          wishStrip.innerHTML = '<p class="memory-preview-empty">Be the first to leave one.</p>';
+          wishCount.textContent = '';
+          return;
+        }
         wishes.forEach(w => {
-          const card = document.createElement('div');
-          card.className = 'wish-card stagger-child';
+          const tile = document.createElement('div');
+          tile.className = 'wish-tile';
           const p = document.createElement('p');
-          p.className = 'wish-card-text';
+          p.className = 'wish-tile-text';
           p.textContent = '“' + w.text + '”';
           const meta = document.createElement('span');
-          meta.className = 'wish-card-meta';
+          meta.className = 'wish-tile-meta';
           meta.textContent = w.name + (w.relation ? ' · ' + w.relation : '');
-          card.appendChild(p);
-          card.appendChild(meta);
-          wall.appendChild(card);
+          tile.appendChild(p); tile.appendChild(meta);
+          wishStrip.appendChild(tile);
         });
-        wall.classList.add('visible');
-      }
-      renderWall();
-
-      const form = document.getElementById('wish-flow');
-      const steps = Array.from(form.querySelectorAll('.wish-step'));
-      const dots = Array.from(form.querySelectorAll('.wish-progress-dot'));
-      let current = 1;
-      let selectedRelation = '';
-
-      function goToStep(n) {
-        steps.forEach(s => s.classList.toggle('active', Number(s.dataset.step) === n));
-        dots.forEach(d => d.classList.toggle('active', Number(d.dataset.dot) <= n));
-        current = n;
+        wishCount.textContent = wishes.nextCursor ? 'more on the full wall' : `${wishes.length} shared so far`;
       }
 
-      form.querySelectorAll('[data-next]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (current === 1) {
-            const name = document.getElementById('wish-name').value.trim();
-            if (!name) { document.getElementById('wish-name').focus(); return; }
-            document.getElementById('wish-prompt-3').textContent =
-              `${name.split(' ')[0]}, leave a blessing, a memory, or just some love.`;
-          }
-          if (current < steps.length) goToStep(current + 1);
-        });
-      });
-      form.querySelectorAll('[data-back]').forEach(btn => {
-        btn.addEventListener('click', () => { if (current > 1) goToStep(current - 1); });
-      });
-
-      document.getElementById('wish-chips').addEventListener('click', (e) => {
-        const chip = e.target.closest('[data-chip]');
-        if (!chip) return;
-        form.querySelectorAll('[data-chip]').forEach(c => c.classList.remove('selected'));
-        chip.classList.add('selected');
-        selectedRelation = chip.textContent;
-      });
-
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('wish-name').value.trim();
-        const text = document.getElementById('wish-text').value.trim();
-        if (!name || !text) return;
-        submitWish({ name, relation: selectedRelation, text });
-        renderWall();
-        form.reset();
-        selectedRelation = '';
-        form.querySelectorAll('[data-chip]').forEach(c => c.classList.remove('selected'));
-        goToStep(1);
-        const wall = document.getElementById('wish-wall');
-        wall.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    })();
-
-
-    /* ─── GUEST PHOTO SHARING — local preview stub ───────
-       NOTE: frontend-only stub. Selected files are only previewed
-       in this browser tab, not uploaded anywhere. Swap in the
-       shared guest-content backend (see /guest-content-backend-prompt.md)
-       to make this a real cross-guest upload.                    */
-    (function () {
-      const addBtn = document.getElementById('share-add-btn');
-      const fileInput = document.getElementById('share-file-input');
-      const grid = document.getElementById('share-grid');
-      addBtn.addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', () => {
-        Array.from(fileInput.files).forEach(file => {
-          const url = URL.createObjectURL(file);
-          const fig = document.createElement('figure');
-          fig.className = 'stagger-child';
-          fig.style.opacity = '1';
-          fig.style.filter = 'none';
-          fig.style.transform = 'none';
+      function renderPhotoStrip(photos) {
+        photoStrip.innerHTML = '';
+        if (!photos.length) {
+          photoStrip.innerHTML = '<p class="memory-preview-empty">Be the first to share one.</p>';
+          photoCount.textContent = '';
+          return;
+        }
+        photos.forEach(p => {
+          const tile = document.createElement('div');
+          tile.className = 'photo-tile';
           const img = document.createElement('img');
-          img.src = url;
-          img.alt = 'Guest-submitted photo';
-          fig.appendChild(img);
-          grid.insertBefore(fig, addBtn);
+          img.src = p.url; img.alt = 'A guest photo from Dag and Gayle\'s celebrations'; img.loading = 'lazy';
+          tile.appendChild(img);
+          photoStrip.appendChild(tile);
         });
-        fileInput.value = '';
-      });
+        photoCount.textContent = photos.nextCursor ? 'more in the gallery' : `${photos.length} photos shared`;
+      }
+
+      async function loadPreviews() {
+        try {
+          const [wishes, photos] = await Promise.all([
+            CFWGuestContent.listWishes({ weddingSlug: WEDDING_SLUG, limit: 6 }),
+            CFWGuestContent.listPhotos({ weddingSlug: WEDDING_SLUG, limit: 9 }),
+          ]);
+          renderWishStrip(wishes);
+          renderPhotoStrip(photos);
+        } catch (err) {
+          wishStrip.innerHTML = '<p class="memory-preview-empty">Couldn\'t load wishes right now.</p>';
+          photoStrip.innerHTML = '<p class="memory-preview-empty">Couldn\'t load photos right now.</p>';
+        }
+      }
+      loadPreviews();
     })();
   </script>
 </body>

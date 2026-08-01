@@ -9,11 +9,12 @@ Static, dependency-free HTML/CSS/JS (no build step) for Dag Josiah & Gayle Hughe
 ## Structure
 
 ```
-index.html       — main site (hero, wishes wall, story, schedule, teasers, share-photos, tidbits, faq, gifts, footer)
-programme.html   — order of service / officiating ministers / order of photography
-gallery.html     — Photo Gallery (Pro) add-on, static grid + lightbox
-pictures/        — all site images (WebP, -sm/-lg srcset pairs) + qr-code.png/.svg + invitation-preview.webp
-  _originals/    — full-res camera JPGs the couple supplied (gitignored — reference only, never shipped)
+index.html          — main site (hero, wishes+photos memory card, story, schedule, teasers, tidbits, faq, gifts, footer)
+programme.html      — order of service / officiating ministers / order of photography
+gallery.html        — Photo Gallery (Pro) add-on, static grid + lightbox
+cfw-guest-content.js — vendored client for the shared CF Weddings guest-content backend (Guest Wishes Wall + Guest Photo Sharing)
+pictures/           — all site images (WebP, -sm/-lg srcset pairs) + qr-code.png/.svg + invitation-preview.webp
+  _originals/       — full-res camera JPGs the couple supplied (gitignored — reference only, never shipped)
 dag-and-gayle-invitation.pdf — downloadable invitation placeholder
 ```
 
@@ -80,13 +81,13 @@ To add more photos later (e.g. real wedding-day shots for the gallery), drop the
 
 ## Guest Wishes Wall & Guest Photo Sharing — read before launch
 
-Both features are currently **frontend-only stubs**:
-- Guest Wishes Wall persists to the visitor's own browser `localStorage`, seeded with two sample wishes so the wall isn't empty. It is **not** shared across visitors yet.
-- Guest Photo Sharing lets a visitor pick photos and see them appended locally, but nothing is uploaded anywhere.
+Both features are merged into a single "Leave Dag & Gayle a memory" card (`#wishes` section in `index.html`) and backed by the shared CF Weddings guest-content service (`cfw-guest-content.js`, a vendored copy of the client from the `guest-content` backend repo). The card's "send" button calls `CFWGuestContent.submitWish()` and/or `.uploadPhoto()` depending on what the guest filled in; two capped, swipeable strips below it hydrate from `.listWishes()` / `.listPhotos()` on page load.
 
-Both have a single clearly-marked seam in `index.html`'s `<script>` (`submitWish()` and the file-input handler, each flagged `TODO(backend)`) to swap in a real backend. We've decided this couple's site — and every future CF Weddings site — should share **one** backend service for this instead of hand-rolling it per couple. The prompt to build that service is in [`guest-content-backend-prompt.md`](guest-content-backend-prompt.md) in this repo; hand it to a fresh Claude Code session as its own project.
+`CFWGuestContent.configure({ baseUrl })` currently points at the **production** Cloud Functions URL (`https://us-central1-cfweddingslive.cloudfunctions.net`). Before guests can actually use this on a live deployment, that deployment's real origin (Vercel domain, custom domain when set) must be registered against the backend via `node scripts/add-wedding.js dagandgayle <origin>` in the `guest-content` repo — the API enforces a per-wedding CORS allow-list and will 403 any unregistered origin.
 
-Until that exists, wishes/photos submitted by real guests will only be visible on their own device. Consider this a known limitation to flag to the couple, not a bug.
+For local development against the Firebase emulator instead of production, see the `guest-content` repo's README ("Local development" section) and temporarily point the `configure({ baseUrl })` call at `http://127.0.0.1:5001/demo-cfw-guest-content/us-central1`.
+
+The "See the full wall →" / "Open the gallery →" links on the two preview strips are placeholders (`href="#"`) pending a dedicated keepsake gallery page — see the `<!-- pending -->` comments above them in `index.html`.
 
 ## Placeholder content — replace before go-live
 
