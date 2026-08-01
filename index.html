@@ -1234,12 +1234,32 @@
   </script>
 
   <script>
-    /* ─── HERO BACKGROUND VIDEO: fallback to poster on error ── */
+    /* ─── HERO BACKGROUND VIDEO: fallback to poster on error, force-play
+       on iOS Safari ────────────────────────────────────────────────
+       The `autoplay` attribute alone is unreliable on iOS: slow cellular
+       can miss the autoplay window, backgrounded tabs pause it, and some
+       in-app browsers (WhatsApp/Instagram) need an explicit play() call
+       even when muted+playsinline — when it's blocked, WebKit shows a
+       native play button over the poster instead of erroring. Retry
+       play() at the moments it's most likely to have been silently
+       blocked, and as a last resort, resume on the guest's first tap. */
     const heroBg = document.getElementById('hero-bg');
     const heroBgVideo = document.getElementById('hero-bg-video');
     if (heroBg && heroBgVideo) {
       heroBgVideo.addEventListener('error', () => heroBg.classList.add('video-failed'), true);
       heroBgVideo.querySelector('source').addEventListener('error', () => heroBg.classList.add('video-failed'));
+
+      heroBgVideo.muted = true; // some WebKit webviews ignore the `muted` attribute unless it's also set as a JS property
+      const tryPlayHero = () => { heroBgVideo.play().catch(() => {}); };
+      tryPlayHero();
+      ['loadedmetadata', 'canplay', 'canplaythrough'].forEach(ev => heroBgVideo.addEventListener(ev, tryPlayHero));
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) tryPlayHero(); });
+      window.addEventListener('pageshow', tryPlayHero);
+
+      const resumeHeroOnGesture = () => { if (heroBgVideo.paused) tryPlayHero(); };
+      window.addEventListener('touchstart', resumeHeroOnGesture, { passive: true, once: true });
+      window.addEventListener('scroll', resumeHeroOnGesture, { passive: true, once: true });
+      window.addEventListener('click', resumeHeroOnGesture, { once: true });
     }
 
     /* ─── SCROLL PROGRESS ─────────────────────────────── */
