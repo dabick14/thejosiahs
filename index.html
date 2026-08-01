@@ -1269,13 +1269,14 @@
     /* ─── COUNTDOWN ─────────────────────────────────────── */
     const targetDate = new Date('2026-08-08T00:00:00').getTime();
     function pad(n) { return String(n).padStart(2, '0'); }
+    let cdInterval;
     function tick() {
       const diff = targetDate - Date.now();
       const el = document.getElementById('countdown');
       if (!el) return;
       if (diff <= 0) {
-        el.innerHTML = '<p class="countdown-done">Today is the day!</p>';
-        clearInterval(cdInterval);
+        el.innerHTML = '<p class="countdown-done">It\'s today!</p>';
+        if (cdInterval) clearInterval(cdInterval);
         return;
       }
       document.getElementById('cd-days').textContent = pad(Math.floor(diff / 86400000));
@@ -1284,7 +1285,7 @@
       document.getElementById('cd-seconds').textContent = pad(Math.floor((diff % 60000) / 1000));
     }
     tick();
-    const cdInterval = setInterval(tick, 1000);
+    cdInterval = setInterval(tick, 1000);
 
 
     /* ─── FAQ ACCORDION ─────────────────────────────────── */
