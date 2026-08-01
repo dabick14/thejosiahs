@@ -12,6 +12,7 @@ Static, dependency-free HTML/CSS/JS (no build step) for Dag Josiah & Gayle Hughe
 index.html          — main site (hero, wishes+photos memory card, story, schedule, teasers, tidbits, faq, gifts, footer)
 programme.html      — order of service / officiating ministers / order of photography
 gallery.html        — Photo Gallery (Pro) add-on, static grid + lightbox
+memories.html       — full wish wall + full guest photo gallery, paginated from the guest-content backend
 cfw-guest-content.js — vendored client for the shared CF Weddings guest-content backend (Guest Wishes Wall + Guest Photo Sharing)
 pictures/           — all site images (WebP, -sm/-lg srcset pairs) + qr-code.png/.svg + invitation-preview.webp
   _originals/       — full-res camera JPGs the couple supplied (gitignored — reference only, never shipped)
@@ -87,7 +88,7 @@ Both features are merged into a single "Leave Dag & Gayle a memory" card (`#wish
 
 For local development against the Firebase emulator instead of production, see the `guest-content` repo's README ("Local development" section) and temporarily point the `configure({ baseUrl })` call at `http://127.0.0.1:5001/demo-cfw-guest-content/us-central1`.
 
-The "See the full wall →" / "Open the gallery →" links on the two preview strips are placeholders (`href="#"`) pending a dedicated keepsake gallery page — see the `<!-- pending -->` comments above them in `index.html`.
+The "See the full wall →" / "Open the gallery →" links on the two preview strips point at `memories.html`, which paginates through every wish/photo via `listWishes`/`listPhotos`' `nextCursor` ("load more" buttons, `PAGE_SIZE = 12` per click) — no unbounded fetch, matches the backend's own page-size cap.
 
 ## Placeholder content — replace before go-live
 

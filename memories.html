@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wishes &amp; Photos · Dag &amp; Gayle</title>
+  <meta name="description" content="Every wish and photo guests have left for Dag Josiah &amp; Gayle Hughes.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500&display=swap" rel="stylesheet">
+
+  <!-- Vercel Web Analytics -->
+  <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+
+  <style>
+    :root {
+      --color-bg: #FFFFFF;
+      --color-bg-alt: #F5F6F7;
+      --color-text-primary: #14161A;
+      --color-text-body: #3A3D42;
+      --color-text-muted: #8A8F98;
+      --color-chrome: #9BA1AA;
+      --color-chrome-light: #DADDE1;
+      --color-chrome-dark: #6B7078;
+      --gradient-chrome: linear-gradient(115deg, #EDEFF1 0%, #B9BEC6 38%, #F4F5F6 62%, #9BA1AA 100%);
+      --color-border: #E4E6E9;
+      --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'Satoshi', 'Jost', -apple-system, sans-serif;
+      --section-padding-y: clamp(4rem, 9vw, 7rem);
+      --section-padding-x: clamp(1.25rem, 6vw, 3rem);
+      --container-wide: 1100px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.75;
+      background: var(--color-bg);
+      color: var(--color-text-body);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100svh;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .site-nav {
+      position: sticky; top: 0; z-index: 20;
+      border-bottom: 1px solid var(--color-border);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .nav-inner {
+      max-width: var(--container-wide);
+      margin: 0 auto;
+      padding: 1.1rem var(--section-padding-x);
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+      font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .nav-brand { font-family: var(--font-display); font-size: 1.05rem; letter-spacing: 0.08em; color: var(--color-text-primary); }
+    .nav-link { color: var(--color-text-muted); border-bottom: 1px solid transparent; transition: border-color 0.2s, color 0.2s; }
+    .nav-link:hover { color: var(--color-text-primary); border-color: var(--color-chrome); }
+
+    .container { max-width: var(--container-wide); margin: 0 auto; padding: 0 var(--section-padding-x); }
+
+    .page-header { padding: var(--section-padding-y) 0 2.5rem; text-align: center; }
+    .eyebrow { font-size: 0.72rem; font-weight: 400; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 1rem; display: block; }
+    .page-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.1rem, 6.5vw, 3.4rem); line-height: 1.1; color: var(--color-text-primary); margin-bottom: 0.6rem; }
+    .page-subtitle { font-style: italic; font-family: var(--font-display); font-size: clamp(1rem, 2vw, 1.25rem); color: var(--color-text-muted); }
+    .page-cta { display: inline-block; margin-top: 1.4rem; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-primary); border-bottom: 1px solid var(--color-chrome); padding-bottom: 2px; }
+    .page-cta:hover { border-color: var(--color-text-primary); }
+
+    .memories-section { padding-bottom: var(--section-padding-y); }
+    .memories-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.6rem; border-top: 1px solid var(--color-border); padding-top: var(--section-padding-y); }
+    .memories-section:first-of-type .memories-section-head { border-top: none; padding-top: 0; }
+    .memories-section-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.5rem, 3vw, 1.9rem); color: var(--color-text-primary); }
+    .memories-section-count { font-size: 0.74rem; color: var(--color-text-muted); white-space: nowrap; }
+
+    .state-msg { font-size: 0.9rem; color: var(--color-text-muted); padding: 2rem 0; text-align: center; }
+    .state-msg.err { color: #A24C4C; }
+
+    /* ─── Wish wall (masonry) ─────────────────────────────── */
+    .wish-grid { column-count: 1; column-gap: 1px; background: var(--color-border); border: 1px solid var(--color-border); }
+    @media (min-width: 560px) { .wish-grid { column-count: 2; } }
+    @media (min-width: 860px) { .wish-grid { column-count: 3; } }
+    .wish-tile { background: var(--color-bg); padding: 1.5rem; break-inside: avoid; margin-bottom: 1px; }
+    .wish-tile-text { font-family: var(--font-display); font-size: 1rem; font-style: italic; line-height: 1.5; color: var(--color-text-primary); margin-bottom: 0.9rem; }
+    .wish-tile-meta { font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--color-chrome-dark); }
+
+    /* ─── Photo grid + lightbox (matches gallery.html) ────── */
+    .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+    @media (max-width: 768px) { .photo-grid { grid-template-columns: repeat(2, 1fr); } }
+    .photo-item { display: block; width: 100%; border: none; padding: 0; background: var(--color-bg-alt); overflow: hidden; cursor: pointer; aspect-ratio: 4 / 5; }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
+    .photo-item:hover img { transform: scale(1.04); }
+
+    .lightbox {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(10, 11, 13, 0.95);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+    .lightbox-img { max-width: 88vw; max-height: 82vh; object-fit: contain; }
+    .lightbox-close, .lightbox-prev, .lightbox-next {
+      position: absolute; background: none; border: none;
+      color: rgba(255, 255, 255, 0.85); cursor: pointer;
+      font-size: 1.8rem; line-height: 1; padding: 0.5rem; transition: opacity 0.2s;
+    }
+    .lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover { opacity: 0.6; }
+    .lightbox-close { top: 1rem; right: 1rem; font-size: 2rem; }
+    .lightbox-prev { left: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 2.5rem; }
+    .lightbox-next { right: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 2.5rem; }
+    .lightbox-counter { position: absolute; bottom: 1.25rem; left: 0; right: 0; text-align: center; font-size: 0.72rem; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.6); }
+
+    /* ─── Load more ────────────────────────────────────────── */
+    .load-more-row { text-align: center; margin-top: 1.6rem; }
+    .load-more {
+      font-family: var(--font-body); font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase;
+      background: transparent; border: 1px solid var(--color-text-primary); color: var(--color-text-primary);
+      padding: 0.75rem 1.6rem; cursor: pointer; transition: background 0.2s, color 0.2s;
+    }
+    .load-more:hover { background: var(--color-text-primary); color: #fff; }
+    .load-more:disabled { opacity: 0.45; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <nav class="site-nav" aria-label="Page navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">D &amp; G</a>
+      <a href="index.html" class="nav-link">back to main page</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <header class="page-header">
+      <span class="eyebrow">dag &amp; gayle · august 8, 2026</span>
+      <h1 class="page-title">Wishes &amp; Photos</h1>
+      <p class="page-subtitle">Every memory guests have left, all in one place.</p>
+      <a href="index.html#wishes" class="page-cta">Leave your own →</a>
+    </header>
+
+    <section class="memories-section" id="wishes" aria-label="All guest wishes">
+      <div class="memories-section-head">
+        <h2 class="memories-section-title">Wishes</h2>
+        <span class="memories-section-count" id="wish-count"></span>
+      </div>
+      <div class="wish-grid" id="wish-grid"></div>
+      <div class="load-more-row" id="wish-load-row" hidden>
+        <button type="button" class="load-more" id="wish-load-more">load more wishes</button>
+        <p class="state-msg err" id="wish-load-error" hidden></p>
+      </div>
+    </section>
+
+    <section class="memories-section" id="photos" aria-label="All guest photos">
+      <div class="memories-section-head">
+        <h2 class="memories-section-title">Photos</h2>
+        <span class="memories-section-count" id="photo-count"></span>
+      </div>
+      <div class="photo-grid" id="photo-grid"></div>
+      <div class="load-more-row" id="photo-load-row" hidden>
+        <button type="button" class="load-more" id="photo-load-more">load more photos</button>
+        <p class="state-msg err" id="photo-load-error" hidden></p>
+      </div>
+    </section>
+  </main>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
+    <button class="lightbox-prev" id="lightbox-prev" aria-label="Previous photo">&#8249;</button>
+    <img class="lightbox-img" id="lightbox-img" alt="">
+    <button class="lightbox-next" id="lightbox-next" aria-label="Next photo">&#8250;</button>
+    <div class="lightbox-counter" id="lightbox-counter"></div>
+  </div>
+
+  <!-- CF Weddings shared guest-content backend (Guest Wishes Wall + Guest Photo Sharing) -->
+  <script src="cfw-guest-content.js"></script>
+  <script>
+    CFWGuestContent.configure({ baseUrl: 'https://us-central1-cfweddingslive.cloudfunctions.net' });
+  </script>
+
+  <script>
+    'use strict';
+    const WEDDING_SLUG = 'dagandgayle';
+    const PAGE_SIZE = 12;
+
+    /* ─── Wishes ──────────────────────────────────────────── */
+    const wishGrid = document.getElementById('wish-grid');
+    const wishCountEl = document.getElementById('wish-count');
+    const wishLoadRow = document.getElementById('wish-load-row');
+    const wishLoadBtn = document.getElementById('wish-load-more');
+    const wishLoadError = document.getElementById('wish-load-error');
+    let wishCursor = null;
+    let wishTotal = 0;
+    let wishesLoadedOnce = false;
+
+    function appendWishes(wishes) {
+      wishes.forEach(w => {
+        const tile = document.createElement('div');
+        tile.className = 'wish-tile';
+        const p = document.createElement('p');
+        p.className = 'wish-tile-text';
+        p.textContent = '“' + w.text + '”';
+        const meta = document.createElement('span');
+        meta.className = 'wish-tile-meta';
+        meta.textContent = w.name + (w.relation ? ' · ' + w.relation : '');
+        tile.appendChild(p);
+        tile.appendChild(meta);
+        wishGrid.appendChild(tile);
+      });
+      wishTotal += wishes.length;
+      wishCountEl.textContent = wishTotal ? `${wishTotal} so far` : '';
+    }
+
+    async function loadMoreWishes() {
+      wishLoadBtn.disabled = true;
+      wishLoadBtn.textContent = 'loading…';
+      wishLoadError.hidden = true;
+      try {
+        const wishes = await CFWGuestContent.listWishes({ weddingSlug: WEDDING_SLUG, limit: PAGE_SIZE, cursor: wishCursor });
+        appendWishes(wishes);
+        wishCursor = wishes.nextCursor;
+        wishLoadRow.hidden = !wishCursor;
+        if (!wishesLoadedOnce && wishTotal === 0) {
+          wishGrid.innerHTML = '<p class="state-msg">Be the first to leave one.</p>';
+        }
+      } catch (err) {
+        if (!wishesLoadedOnce) {
+          wishGrid.innerHTML = `<p class="state-msg err">${(err && err.message) || 'Could not load wishes right now.'}</p>`;
+          wishLoadRow.hidden = true;
+        } else {
+          wishLoadRow.hidden = false;
+          wishLoadError.hidden = false;
+          wishLoadError.textContent = (err && err.message) || 'Could not load more wishes — try again.';
+        }
+      } finally {
+        wishesLoadedOnce = true;
+        wishLoadBtn.disabled = false;
+        wishLoadBtn.textContent = 'load more wishes';
+      }
+    }
+    wishLoadBtn.addEventListener('click', loadMoreWishes);
+
+    /* ─── Photos ──────────────────────────────────────────── */
+    const photoGrid = document.getElementById('photo-grid');
+    const photoCountEl = document.getElementById('photo-count');
+    const photoLoadRow = document.getElementById('photo-load-row');
+    const photoLoadBtn = document.getElementById('photo-load-more');
+    const photoLoadError = document.getElementById('photo-load-error');
+    let photoCursor = null;
+    let photoTotal = 0;
+    let photosLoadedOnce = false;
+    const allPhotos = [];
+
+    function appendPhotos(photos) {
+      photos.forEach(p => {
+        allPhotos.push(p);
+        const idx = allPhotos.length - 1;
+        const btn = document.createElement('button');
+        btn.className = 'photo-item';
+        btn.setAttribute('aria-label', `Open photo ${idx + 1}`);
+        const img = document.createElement('img');
+        img.src = p.url;
+        img.loading = 'lazy';
+        img.alt = 'A guest photo from Dag and Gayle\'s celebrations';
+        btn.appendChild(img);
+        btn.addEventListener('click', () => openLightbox(idx));
+        photoGrid.appendChild(btn);
+      });
+      photoTotal += photos.length;
+      photoCountEl.textContent = photoTotal ? `${photoTotal} shared` : '';
+    }
+
+    async function loadMorePhotos() {
+      photoLoadBtn.disabled = true;
+      photoLoadBtn.textContent = 'loading…';
+      photoLoadError.hidden = true;
+      try {
+        const photos = await CFWGuestContent.listPhotos({ weddingSlug: WEDDING_SLUG, limit: PAGE_SIZE, cursor: photoCursor });
+        appendPhotos(photos);
+        photoCursor = photos.nextCursor;
+        photoLoadRow.hidden = !photoCursor;
+        if (!photosLoadedOnce && photoTotal === 0) {
+          photoGrid.innerHTML = '<p class="state-msg">Be the first to share one.</p>';
+        }
+      } catch (err) {
+        if (!photosLoadedOnce) {
+          photoGrid.innerHTML = `<p class="state-msg err">${(err && err.message) || 'Could not load photos right now.'}</p>`;
+          photoLoadRow.hidden = true;
+        } else {
+          photoLoadRow.hidden = false;
+          photoLoadError.hidden = false;
+          photoLoadError.textContent = (err && err.message) || 'Could not load more photos — try again.';
+        }
+      } finally {
+        photosLoadedOnce = true;
+        photoLoadBtn.disabled = false;
+        photoLoadBtn.textContent = 'load more photos';
+      }
+    }
+    photoLoadBtn.addEventListener('click', loadMorePhotos);
+
+    /* ─── Lightbox ────────────────────────────────────────── */
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCounter = document.getElementById('lightbox-counter');
+    let lightboxIndex = -1;
+
+    function openLightbox(i) {
+      lightboxIndex = i;
+      updateLightbox();
+      lightbox.classList.add('open');
+      lightbox.setAttribute('aria-hidden', 'false');
+    }
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      lightbox.setAttribute('aria-hidden', 'true');
+    }
+    function updateLightbox() {
+      const p = allPhotos[lightboxIndex];
+      lightboxImg.src = p.url;
+      lightboxImg.alt = `Photo ${lightboxIndex + 1} of ${allPhotos.length}`;
+      lightboxCounter.textContent = `${lightboxIndex + 1} / ${allPhotos.length}`;
+    }
+    function showPrev() { lightboxIndex = (lightboxIndex - 1 + allPhotos.length) % allPhotos.length; updateLightbox(); }
+    function showNext() { lightboxIndex = (lightboxIndex + 1) % allPhotos.length; updateLightbox(); }
+
+    document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+    document.getElementById('lightbox-prev').addEventListener('click', showPrev);
+    document.getElementById('lightbox-next').addEventListener('click', showNext);
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', (e) => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') showPrev();
+      if (e.key === 'ArrowRight') showNext();
+    });
+
+    loadMoreWishes();
+    loadMorePhotos();
+  </script>
+</body>
+</html>
