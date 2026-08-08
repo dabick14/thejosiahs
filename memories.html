@@ -126,7 +126,28 @@
     }
     .load-more:hover { background: var(--color-text-primary); color: #fff; }
     .load-more:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ─── Scroll reveal: directional (left / right / up) ─────
+       Add reveal-left / reveal-right to slide content in from a side,
+       or reveal-up for centered content; alternate left/right down the
+       page. JS below adds .visible once ~15-20% in view, then stops
+       watching so the animation plays only once. */
+    .reveal-left, .reveal-right, .reveal-up {
+      opacity: 0;
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+    .reveal-left  { transform: translateX(-36px); }
+    .reveal-right { transform: translateX(36px); }
+    .reveal-up    { transform: translateY(28px); }
+    .reveal-left.visible, .reveal-right.visible, .reveal-up.visible {
+      opacity: 1;
+      transform: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal-left, .reveal-right, .reveal-up { opacity: 1; transform: none; transition: none; }
+    }
   </style>
+  <noscript><style>.reveal-left, .reveal-right, .reveal-up { opacity: 1 !important; transform: none !important; }</style></noscript>
 </head>
 <body>
   <nav class="site-nav" aria-label="Page navigation">
@@ -137,7 +158,7 @@
   </nav>
 
   <main class="container">
-    <header class="page-header">
+    <header class="page-header reveal-up">
       <span class="eyebrow">dag &amp; gayle · august 8, 2026</span>
       <h1 class="page-title">Wishes &amp; Photos</h1>
       <p class="page-subtitle">Every memory guests have left, all in one place.</p>
@@ -145,7 +166,7 @@
     </header>
 
     <section class="memories-section" id="wishes" aria-label="All guest wishes">
-      <div class="memories-section-head">
+      <div class="memories-section-head reveal-left">
         <h2 class="memories-section-title">Wishes</h2>
         <span class="memories-section-count" id="wish-count"></span>
       </div>
@@ -157,7 +178,7 @@
     </section>
 
     <section class="memories-section" id="photos" aria-label="All guest photos">
-      <div class="memories-section-head">
+      <div class="memories-section-head reveal-right">
         <h2 class="memories-section-title">Photos</h2>
         <span class="memories-section-count" id="photo-count"></span>
       </div>
@@ -188,6 +209,20 @@
     const WEDDING_SLUG = 'dagandgayle';
     const PAGE_SIZE = 12;
 
+    /* ─── SCROLL REVEAL: directional (left/right/up) ─────────
+       Wishes and photos load asynchronously (and via "load more"), so
+       each tile is observed the moment it's created rather than in one
+       pass at page load. */
+    const revealDirObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealDirObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.18, rootMargin: '0px 0px -60px 0px' });
+    document.querySelectorAll('.reveal-left, .reveal-right, .reveal-up').forEach(el => revealDirObserver.observe(el));
+
     /* ─── Wishes ──────────────────────────────────────────── */
     const wishGrid = document.getElementById('wish-grid');
     const wishCountEl = document.getElementById('wish-count');
@@ -199,9 +234,10 @@
     let wishesLoadedOnce = false;
 
     function appendWishes(wishes) {
-      wishes.forEach(w => {
+      wishes.forEach((w, i) => {
         const tile = document.createElement('div');
-        tile.className = 'wish-tile';
+        tile.className = 'wish-tile reveal-up';
+        tile.style.transitionDelay = `${(i % 6) * 0.1}s`;
         const p = document.createElement('p');
         p.className = 'wish-tile-text';
         p.textContent = '“' + w.text + '”';
@@ -211,6 +247,7 @@
         tile.appendChild(p);
         tile.appendChild(meta);
         wishGrid.appendChild(tile);
+        revealDirObserver.observe(tile);
       });
       wishTotal += wishes.length;
       wishCountEl.textContent = wishTotal ? `${wishTotal} so far` : '';
@@ -261,7 +298,8 @@
         allPhotos.push(p);
         const idx = allPhotos.length - 1;
         const btn = document.createElement('button');
-        btn.className = 'photo-item';
+        btn.className = 'photo-item reveal-up';
+        btn.style.transitionDelay = `${(idx % 6) * 0.1}s`;
         btn.setAttribute('aria-label', `Open photo ${idx + 1}`);
         const img = document.createElement('img');
         img.src = p.url;
@@ -270,6 +308,7 @@
         btn.appendChild(img);
         btn.addEventListener('click', () => openLightbox(idx));
         photoGrid.appendChild(btn);
+        revealDirObserver.observe(btn);
       });
       photoTotal += photos.length;
       photoCountEl.textContent = photoTotal ? `${photoTotal} shared` : '';
