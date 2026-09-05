@@ -127,6 +127,23 @@
     .load-more:hover { background: var(--color-text-primary); color: #fff; }
     .load-more:disabled { opacity: 0.45; cursor: not-allowed; }
 
+    /* ─── Skeleton loaders (shimmer) ──────────────────────── */
+    @keyframes skeleton-sheen { 0% { background-position: -150% 0; } 100% { background-position: 150% 0; } }
+    .skeleton-tile { position: relative; overflow: hidden; background: var(--color-bg-alt); }
+    .skeleton-tile::after {
+      content: ''; position: absolute; inset: 0;
+      background: var(--gradient-chrome); background-size: 220% 100%; opacity: 0.5;
+      animation: skeleton-sheen 1.7s ease-in-out infinite;
+    }
+    .skeleton-wish { height: 150px; }
+    @media (prefers-reduced-motion: reduce) {
+      .skeleton-tile::after { animation: none; opacity: 0.28; }
+    }
+
+    /* ─── Photo fade-in (avoid the abrupt "pop" once an image loads) ── */
+    .photo-item img { opacity: 0; transition: transform 0.5s ease, opacity 0.4s ease; }
+    .photo-item img.loaded { opacity: 1; }
+
     /* ─── Scroll reveal: directional (left / right / up) ─────
        Add reveal-left / reveal-right to slide content in from a side,
        or reveal-up for centered content; alternate left/right down the
@@ -223,6 +240,21 @@
     }, { threshold: 0.18, rootMargin: '0px 0px -60px 0px' });
     document.querySelectorAll('.reveal-left, .reveal-right, .reveal-up').forEach(el => revealDirObserver.observe(el));
 
+    /* ─── Skeleton loaders: shown immediately, cleared once the
+       first real batch of wishes/photos is appended (or on error). ── */
+    function renderSkeletons(container, cls, count) {
+      const frag = document.createDocumentFragment();
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.className = `skeleton-tile ${cls}`;
+        frag.appendChild(el);
+      }
+      container.appendChild(frag);
+    }
+    function clearSkeletons(container) {
+      container.querySelectorAll('.skeleton-tile').forEach(el => el.remove());
+    }
+
     /* ─── Wishes ──────────────────────────────────────────── */
     const wishGrid = document.getElementById('wish-grid');
     const wishCountEl = document.getElementById('wish-count');
@@ -234,6 +266,7 @@
     let wishesLoadedOnce = false;
 
     function appendWishes(wishes) {
+      clearSkeletons(wishGrid);
       wishes.forEach((w, i) => {
         const tile = document.createElement('div');
         tile.className = 'wish-tile reveal-up';
@@ -294,6 +327,7 @@
     const allPhotos = [];
 
     function appendPhotos(photos) {
+      clearSkeletons(photoGrid);
       photos.forEach(p => {
         allPhotos.push(p);
         const idx = allPhotos.length - 1;
@@ -305,6 +339,7 @@
         img.src = p.url;
         img.loading = 'lazy';
         img.alt = 'A guest photo from Dag and Gayle\'s celebrations';
+        img.addEventListener('load', () => img.classList.add('loaded'));
         btn.appendChild(img);
         btn.addEventListener('click', () => openLightbox(idx));
         photoGrid.appendChild(btn);
@@ -379,6 +414,8 @@
       if (e.key === 'ArrowRight') showNext();
     });
 
+    renderSkeletons(wishGrid, 'wish-tile skeleton-wish', 6);
+    renderSkeletons(photoGrid, 'photo-item', 6);
     loadMoreWishes();
     loadMorePhotos();
   </script>

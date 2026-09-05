@@ -757,6 +757,23 @@
 
     .memory-preview-empty { font-size: 0.85rem; color: var(--color-text-muted); }
 
+    /* ─── Skeleton loaders (shimmer) ──────────────────────── */
+    @keyframes skeleton-sheen { 0% { background-position: -150% 0; } 100% { background-position: 150% 0; } }
+    .skeleton-tile { position: relative; overflow: hidden; background: var(--color-bg-alt); }
+    .skeleton-tile::after {
+      content: ''; position: absolute; inset: 0;
+      background: var(--gradient-chrome); background-size: 220% 100%; opacity: 0.5;
+      animation: skeleton-sheen 1.7s ease-in-out infinite;
+    }
+    .memory-strip .wish-tile.skeleton-tile { min-height: 150px; }
+    @media (prefers-reduced-motion: reduce) {
+      .skeleton-tile::after { animation: none; opacity: 0.28; }
+    }
+
+    /* ─── Photo fade-in (avoid the abrupt "pop" once an image loads) ── */
+    .photo-tile img { opacity: 0; transition: opacity 0.4s ease; }
+    .photo-tile img.loaded { opacity: 1; }
+
     .memory-seeall {
       display: inline-block; margin-top: 0.9rem; font-size: 0.72rem; letter-spacing: 0.05em;
       text-transform: uppercase; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); padding-bottom: 2px;
@@ -1586,6 +1603,7 @@
           tile.className = 'photo-tile';
           const img = document.createElement('img');
           img.src = p.url; img.alt = 'A guest photo from Dag and Gayle\'s celebrations'; img.loading = 'lazy';
+          img.addEventListener('load', () => img.classList.add('loaded'));
           tile.appendChild(img);
           photoStrip.appendChild(tile);
         });
@@ -1605,6 +1623,16 @@
           photoStrip.innerHTML = '<p class="memory-preview-empty">Couldn\'t load photos right now.</p>';
         }
       }
+      function renderSkeletonStrip(strip, cls, count) {
+        strip.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+          const el = document.createElement('div');
+          el.className = `${cls} skeleton-tile`;
+          strip.appendChild(el);
+        }
+      }
+      renderSkeletonStrip(wishStrip, 'wish-tile', 4);
+      renderSkeletonStrip(photoStrip, 'photo-tile', 4);
       loadPreviews();
     })();
   </script>
